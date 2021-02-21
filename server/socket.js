@@ -29,6 +29,7 @@ module.exports = function(server,game,chat) {
 
     function onConnection(socket) {
 
+        console.log("client connecting");
         socket.once('join', function(info, ack) {
             if (typeof ack !== 'function')
                 return sendError(socket, '[join] No ack function');

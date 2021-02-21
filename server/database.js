@@ -6,10 +6,16 @@ var lib = require('./lib');
 var pg = require('pg');
 var config = require('./config');
 
-if (!config.DATABASE_URL)
+
+var databaseUrl = "postgres://"+process.env.PGUSER+":"+process.env.PGPASSWORD+"@"+process.env.PGHOST+"/"+process.env.PGDATABASE;
+var pool = new pg.Pool({
+    connectionString: databaseUrl
+});
+
+if (!databaseUrl)
     throw new Error('must set DATABASE_URL environment var');
 
-console.log('DATABASE_URL: ', config.DATABASE_URL);
+console.log('DATABASE_URL: ', databaseUrl);
 
 // Increase the client pool size. At the moment the most concurrent
 // queries are performed when auto-bettors join a newly created
@@ -17,7 +23,7 @@ console.log('DATABASE_URL: ', config.DATABASE_URL);
 // of 25-35 players per game, an increase to 20 seems reasonable to
 // ensure that most queries are submitted after around 1 round-trip
 // waiting time or less.
-pg.defaults.poolSize = 20;
+pg.defaults.poolSize = 50;
 
 // The default timeout is 30s, or the time from 1.00x to 6.04x.
 // Considering that most of the action happens during the beginning
@@ -35,10 +41,9 @@ pg.types.setTypeParser(1700, function(val) { // parse numeric as a float
     return val === null ? null : parseFloat(val);
 });
 
-// callback is called with (err, client, done)
 function connect(callback) {
-    return pg.connect(config.DATABASE_URL, callback);
-}
+    pool.connect(callback);
+}// callback is called with (err, client, done)
 
 function query(query, params, callback) {
     //third parameter is optional
@@ -109,9 +114,10 @@ function getClient(runner, callback) {
 
 exports.query = query;
 
-pg.on('error', function(err) {
-    console.error('POSTGRES EMITTED AN ERROR', err);
-});
+pool.on('error', (err, client) => {
+    console.error('Unexpected error on idle client', err)
+    process.exit(-1)
+  })
 
 // runner takes (client, callback)
 

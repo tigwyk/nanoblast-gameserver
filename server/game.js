@@ -70,7 +70,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
                 max_win: self.maxWin,
                 time_till_start: restartTime
             });
-
+            console.log("starting game");
             setTimeout(blockGame, restartTime);
         });
     }
@@ -105,7 +105,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         self.joined.clear();
 
         self.emit('game_started', bets);
-
+        console.log("game started");
         self.setForcePoint();
 
         callTick(0);
@@ -137,8 +137,10 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
 
         // and run the next
 
-        if (at > self.crashPoint)
+        if (at > self.crashPoint) {
             endGame(false); // oh noes, we crashed!
+            console.log("busted");
+        }
         else
             tick(elapsed);
     }
@@ -167,6 +169,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             });
 
             self.bankroll -= givenOut;
+            console.log("paid out ",givenOut);
         }
 
         var playerInfo = self.getInfo().player_info;
@@ -217,6 +220,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         });
 
         self.state = 'ENDED';
+        console.log("game ",self.state);
     }
 
     function tick(elapsed) {
@@ -421,8 +425,10 @@ Game.prototype.cashOut = function(user, callback) {
     var at = growthFunc(elapsed);
     var play = lib.getOwnProperty(self.players, user.username);
 
-    if (!play)
+    if (!play) {
+        console.log("No bets placed");
         return callback('NO_BET_PLACED');
+    }
 
     if (play.autoCashOut <= at)
         at = play.autoCashOut;
@@ -490,7 +496,7 @@ Game.prototype.shutDown = function() {
 
     self.gameShuttingDown = true;
     self.emit('shuttingdown');
-
+    console.log("shutting down game");
     // If the game has already ended, we can shutdown immediately.
     if (this.state === 'ENDED') {
         self.emit('shutdown');

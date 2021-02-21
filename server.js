@@ -3,7 +3,9 @@ var assert = require('assert');
 var constants = require('constants');
 var fs = require('fs');
 var path = require('path');
-
+const dotenv = require('dotenv');
+console.log('loading config overwrites from .env');
+dotenv.config();
 var config = require('./server/config');
 var socket = require('./server/socket');
 var database = require('./server/database');
