@@ -160,9 +160,9 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             Object.keys(self.players).forEach(function(player) {
                 var record = self.players[player];
 
-                givenOut += record.bet * 0.01;
+                givenOut += record.bet;
                 if (record.status === 'CASHED_OUT') {
-                    var given = record.stoppedAt * (record.bet / 100);
+                    var given = record.stoppedAt * record.bet;
                     assert(lib.isInt(given) && given > 0);
                     givenOut += given;
                 }
@@ -177,6 +177,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         bonuses.forEach(function(entry) {
             bonusJson[entry.user.username] = entry.amount;
             playerInfo[entry.user.username].bonus = entry.amount;
+            console.log(entry.amount);
         });
 
         self.lastHash = self.hash;
@@ -281,7 +282,7 @@ Game.prototype.placeBet = function(user, betAmount, autoCashOut, callback) {
     assert(typeof user.id === 'number');
     assert(typeof user.username === 'string');
     assert(lib.isInt(betAmount));
-    assert(lib.isInt(autoCashOut) && autoCashOut >= 100);
+    assert(lib.isInt(autoCashOut) && autoCashOut >= 1);
 
     if (self.state !== 'STARTING')
         return callback('GAME_IN_PROGRESS');
@@ -334,7 +335,7 @@ Game.prototype.doCashOut = function(play, at, callback) {
     self.players[username].status = 'CASHED_OUT';
     self.players[username].stoppedAt = at;
 
-    var won = (self.players[username].bet / 100) * at;
+    var won = self.players[username].bet * at;
     assert(lib.isInt(won));
 
     self.emit('cashed_out', {
@@ -391,7 +392,7 @@ Game.prototype.setForcePoint = function() {
        var play = self.players[playerName];
 
        if (play.status === 'CASHED_OUT') {
-           var amount = play.bet * (play.stoppedAt - 100) / 100;
+           var amount = play.bet * (play.stoppedAt - 100);
            totalCashedOut += amount;
        } else {
            assert(play.status == 'PLAYING');
@@ -403,7 +404,7 @@ Game.prototype.setForcePoint = function() {
    if (totalBet === 0) {
        self.forcePoint = Infinity; // the game can go until it crashes, there's no end.
    } else {
-       var left = self.maxWin - totalCashedOut - (totalBet * 0.01);
+       var left = self.maxWin - totalCashedOut - totalBet;
 
        var ratio =  (left+totalBet) / totalBet;
 
@@ -549,7 +550,7 @@ function calcBonuses(input) {
         var bet = record.bet;
         assert(lib.isInt(bet));
 
-        bonusPool += bet / 100;
+        bonusPool += bet;
         assert(lib.isInt(bonusPool));
 
         largestBet = Math.max(largestBet, bet);

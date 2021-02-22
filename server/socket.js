@@ -65,7 +65,7 @@ module.exports = function(server,game,chat) {
                 res['chat'] = chat.getHistory(loggedIn);
                 res['table_history'] = game.gameHistory.getHistory();
                 res['username'] = loggedIn ? loggedIn.username : null;
-                res['balance_satoshis'] = loggedIn ? loggedIn.balance_satoshis : null;
+                res['balance_rais'] = loggedIn ? loggedIn.balance_rais : null;
                 ack(null, res);
 
                 joined(socket, loggedIn);
@@ -105,17 +105,17 @@ module.exports = function(server,game,chat) {
             if (!lib.isInt(amount)) {
                 return sendError(socket, '[place_bet] No place bet amount: ' + amount);
             }
-            if (amount <= 0 || !lib.isInt(amount / 100)) {
-                return sendError(socket, '[place_bet] Must place a bet in multiples of 100, got: ' + amount);
+            if (amount <= 0) {
+                return sendError(socket, '[place_bet] Bet must be a positive amount, got: ' + amount);
             }
 
-            if (amount > 1e8) // 1 BTC limit
-                return sendError(socket, '[place_bet] Max bet size is 1 BTC got: ' + amount);
+            if (amount > 1e24) // 1 NANO limit
+                return sendError(socket, '[place_bet] Max bet size is 1 NANO got: ' + amount);
 
             if (!autoCashOut)
                 return sendError(socket, '[place_bet] Must Send an autocashout with a bet');
 
-            else if (!lib.isInt(autoCashOut) || autoCashOut < 100)
+            else if (!lib.isInt(autoCashOut) || autoCashOut < 1)
                 return sendError(socket, '[place_bet] auto_cashout problem');
 
             if (typeof ack !== 'function')

@@ -189,7 +189,7 @@ exports.placeBet = function(amount, autoCashOut, userId, gameId, callback) {
     getClient(function(client, callback) {
       var tasks = [
         function(callback) {
-          client.query('UPDATE users SET balance_satoshis = balance_satoshis - $1 WHERE id = $2',
+          client.query('UPDATE users SET balance_rais = balance_rais - $1 WHERE id = $2',
             [amount, userId], callback);
         },
         function(callback) {
@@ -221,7 +221,7 @@ var endGameQuery =
   '), p AS (' +
   ' UPDATE plays SET bonus = vals.bonus FROM vals WHERE id = vals.play_id RETURNING vals.user_id '+
   '), u AS (' +
-  ' UPDATE users SET balance_satoshis = balance_satoshis + vals.bonus ' +
+  ' UPDATE users SET balance_rais = balance_rais + vals.bonus ' +
   ' FROM vals WHERE id = vals.user_id RETURNING vals.user_id ' +
   ') SELECT COUNT(*) count FROM p JOIN u ON p.user_id = u.user_id';
 
@@ -272,7 +272,7 @@ exports.endGame = function(gameId, bonuses, callback) {
 
 function addSatoshis(client, userId, amount, callback) {
 
-    client.query('UPDATE users SET balance_satoshis = balance_satoshis + $1 WHERE id = $2', [amount, userId], function(err, res) {
+    client.query('UPDATE users SET balance_rais = balance_rais + $1 WHERE id = $2', [amount, userId], function(err, res) {
         if (err) return callback(err);
         assert(res.rowCount === 1);
         callback(null);
@@ -341,7 +341,7 @@ exports.createGame = function(gameId, callback) {
 exports.getBankroll = function(callback) {
     query('SELECT (' +
             '(SELECT COALESCE(SUM(amount),0) FROM fundings) - ' +
-            '(SELECT COALESCE(SUM(balance_satoshis), 0) FROM users)) AS profit ',
+            '(SELECT COALESCE(SUM(balance_rais), 0) FROM users)) AS profit ',
         function(err, results) {
             if (err) return callback(err);
 
