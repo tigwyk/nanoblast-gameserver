@@ -2,3 +2,6 @@ node_modules
 build/
 .*.swp
 .env
+*.crt
+*.pem
+*.key
