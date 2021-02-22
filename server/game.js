@@ -177,7 +177,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         bonuses.forEach(function(entry) {
             bonusJson[entry.user.username] = entry.amount;
             playerInfo[entry.user.username].bonus = entry.amount;
-            console.log(entry.amount);
+            console.log("Bonuses: ",entry.amount);
         });
 
         self.lastHash = self.hash;
@@ -550,8 +550,7 @@ function calcBonuses(input) {
         var bet = record.bet;
         assert(lib.isInt(bet));
 
-        bonusPool += bet;
-        assert(lib.isInt(bonusPool));
+        bonusPool += bet*0.01;
 
         largestBet = Math.max(largestBet, bet);
     }
@@ -562,7 +561,7 @@ function calcBonuses(input) {
         function(listOfRecords, cashOutAmount, totalBetAmount) {
             if (bonusPool <= 0)
                 return;
-
+            console.log("Bonus pool: ",bonusPool);
             var toAllocAll = Math.min(totalBetAmount * maxWinRatio, bonusPool);
 
             for (var i = 0; i < listOfRecords.length; ++i) {
