@@ -70,7 +70,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
                 max_win: self.maxWin,
                 time_till_start: restartTime
             });
-            console.log("starting game");
+            //console.log("starting game");
             setTimeout(blockGame, restartTime);
         });
     }
@@ -105,7 +105,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         self.joined.clear();
 
         self.emit('game_started', bets);
-        console.log("game started");
+        //console.log("game started");
         self.setForcePoint();
 
         callTick(0);
@@ -139,7 +139,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
 
         if (at > self.crashPoint) {
             endGame(false); // oh noes, we crashed!
-            console.log("busted");
+            //console.log("busted");
         }
         else
             tick(elapsed);
@@ -169,7 +169,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             });
 
             self.bankroll -= givenOut;
-            console.log("paid out ",givenOut);
+            //console.log("paid out ",givenOut);
         }
 
         var playerInfo = self.getInfo().player_info;
@@ -177,7 +177,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         bonuses.forEach(function(entry) {
             bonusJson[entry.user.username] = entry.amount;
             playerInfo[entry.user.username].bonus = entry.amount;
-            console.log("Bonuses: ",entry.amount);
+            //console.log("Bonuses: ",entry.amount);
         });
 
         self.lastHash = self.hash;
@@ -221,7 +221,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
         });
 
         self.state = 'ENDED';
-        console.log("game ",self.state);
+        //console.log("game ",self.state);
     }
 
     function tick(elapsed) {
@@ -427,7 +427,7 @@ Game.prototype.cashOut = function(user, callback) {
     var play = lib.getOwnProperty(self.players, user.username);
 
     if (!play) {
-        console.log("No bets placed");
+        //console.log("No bets placed");
         return callback('NO_BET_PLACED');
     }
 
@@ -454,7 +454,7 @@ Game.prototype.cashOutAll = function(at, callback) {
     if (this.state !== 'IN_PROGRESS')
         return callback();
 
-    console.log('Cashing everyone out at: ', at);
+    //console.log('Cashing everyone out at: ', at);
 
     assert(at >= 100);
 
@@ -497,7 +497,7 @@ Game.prototype.shutDown = function() {
 
     self.gameShuttingDown = true;
     self.emit('shuttingdown');
-    console.log("shutting down game");
+    //console.log("shutting down game");
     // If the game has already ended, we can shutdown immediately.
     if (this.state === 'ENDED') {
         self.emit('shutdown');
@@ -561,7 +561,7 @@ function calcBonuses(input) {
         function(listOfRecords, cashOutAmount, totalBetAmount) {
             if (bonusPool <= 0)
                 return;
-            console.log("Bonus pool: ",bonusPool);
+            //console.log("Bonus pool: ",bonusPool);
             var toAllocAll = Math.min(totalBetAmount * maxWinRatio, bonusPool);
 
             for (var i = 0; i < listOfRecords.length; ++i) {
