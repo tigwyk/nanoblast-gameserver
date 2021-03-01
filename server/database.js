@@ -225,13 +225,13 @@ var endGameQuery =
   ' FROM vals WHERE id = vals.user_id RETURNING vals.user_id ' +
   ') SELECT COUNT(*) count FROM p JOIN u ON p.user_id = u.user_id';
 
-exports.endGame = function(gameId, bonuses, callback) {
+exports.endGame = function(gameId, bonuses, highestMulti, callback) {
     assert(typeof gameId === 'number');
     assert(typeof callback === 'function');
 
 
     getClient(function(client, callback) {
-      client.query('UPDATE games SET ended = true WHERE id = $1', [gameId],
+      client.query('UPDATE games SET ended = true,highest_crash = $2 WHERE id = $1', [gameId,highestMulti],
         function (err) {
           if (err) return callback(new Error('Could not end game, got: ' + err));
 
@@ -347,10 +347,10 @@ exports.getBankroll = function(callback) {
 
             assert(results.rows.length === 1);
 
-            var profit = results.rows[0].profit - 100e8;
+            var profit = results.rows[0].profit - 1e8;
             assert(typeof profit === 'number');
 
-            var min = 1e8;
+            var min = 1e6;
 
             callback(null, Math.max(min, profit));
         }
@@ -361,7 +361,7 @@ exports.getBankroll = function(callback) {
 exports.getGameHistory = function(callback) {
 
     var sql =
-        'SELECT games.id game_id, game_crash, created, ' +
+        'SELECT games.id game_id, game_crash, created, highest_crash,' +
         '     (SELECT hash FROM game_hashes WHERE game_id = games.id), ' +
         '     (SELECT to_json(array_agg(to_json(pv))) ' +
         '        FROM (SELECT username, bet, (100 * cash_out / bet) AS stopped_at, bonus ' +

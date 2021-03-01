@@ -33,9 +33,17 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
     self.players = {}; // An object of userName ->  { playId: ..., autoCashOut: .... }
     self.gameId = lastGameId;
     self.gameHistory = gameHistory;
-
+    //console.log("Game() self.gameHistory = ",self.gameHistory);
     self.lastHash = lastHash;
     self.hash = null;
+    console.log("Game() self.gameHistory gameTable: ",self.gameHistory.gameTable.first())
+    if(self.gameHistory.gameTable.length === 0) {
+        self.highestMulti = 0;
+    } else {
+        console.log("Previous highest crash: ",gameHistory.gameTable.first()['highest_crash']);
+        self.highestMulti = typeof gameHistory.gameTable.first()['highest_crash'] === 'number' ? gameHistory.gameTable.first()['highest_crash'] : 0;
+    }
+    console.log("Game() self.highestMulti = ",self.highestMulti);
 
     events.EventEmitter.call(self);
 
@@ -68,7 +76,8 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             self.emit('game_starting', {
                 game_id: self.gameId,
                 max_win: self.maxWin,
-                time_till_start: restartTime
+                time_till_start: restartTime,
+                highest_multi: self.highestMulti
             });
             //console.log("starting game");
             setTimeout(blockGame, restartTime);
@@ -182,13 +191,20 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
 
         self.lastHash = self.hash;
 
+        //console.log("crashPoint: ",self.crashPoint);
+        
+        if(self.crashPoint > self.highestMulti) {
+            self.highestMulti = self.crashPoint;
+        }
+        //console.log("self.highestMulti",self.highestMulti);
         // oh noes, we crashed!
         self.emit('game_crash', {
             forced: forced,
             elapsed: self.gameDuration,
             game_crash: self.crashPoint, // We send 0 to client in instant crash
             bonuses: bonusJson,
-            hash: self.lastHash
+            hash: self.lastHash,
+            highest_multi: self.highestMulti
         });
 
         self.gameHistory.addCompletedGame({
@@ -196,8 +212,12 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             game_crash: self.crashPoint,
             created: self.startTime,
             player_info: playerInfo,
-            hash: self.lastHash
+            hash: self.lastHash,
+            highest_multi: self.highestMulti,
         });
+        
+
+
 
         var dbTimer;
         dbTimeout();
@@ -209,7 +229,7 @@ function Game(lastGameId, lastHash, bankroll, gameHistory) {
             }, 1000);
         }
 
-        db.endGame(gameId, bonuses, function(err) {
+        db.endGame(gameId, bonuses, self.highestMulti, function(err) {
             if (err)
                 console.log('ERROR could not end game id: ', gameId, ' got err: ', err);
             clearTimeout(dbTimer);
@@ -261,6 +281,7 @@ Game.prototype.getInfo = function() {
         game_id: this.gameId, // game_id of current game, if game hasnt' started its the last game
         last_hash: this.lastHash,
         max_win: this.maxWin,
+        highest_multi: this.highestMulti,
         // if the game is pending, elapsed is how long till it starts
         // if the game is running, elapsed is how long its running for
         /// if the game is ended, elapsed is how long since the game started

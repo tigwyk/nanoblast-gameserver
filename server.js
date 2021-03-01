@@ -9,6 +9,7 @@ dotenv.config();
 var config = require('./server/config');
 var socket = require('./server/socket');
 var database = require('./server/database');
+var nano = require('./server/nano_client');
 var Game = require('./server/game');
 var Chat = require('./server/chat');
 var GameHistory = require('./server/game_history');
@@ -53,7 +54,10 @@ async.parallel([
     var info = results[1];
     var bankroll = results[2];
 
-    console.log('Have a bankroll of: ', bankroll/1e8, ' btc');
+    
+    console.log('Have a bankroll of: ', bankroll/1e6, ' NANO');
+    
+    
 
     var lastGameId = info.id;
     var lastHash = info.hash;
