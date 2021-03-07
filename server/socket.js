@@ -115,7 +115,7 @@ module.exports = function(server,game,chat) {
             if (!autoCashOut)
                 return sendError(socket, '[place_bet] Must Send an autocashout with a bet');
 
-            else if (!lib.isInt(autoCashOut) || autoCashOut < 1)
+            else if (!lib.isInt(autoCashOut) || autoCashOut < 100)
                 return sendError(socket, '[place_bet] auto_cashout problem');
 
             if (typeof ack !== 'function')

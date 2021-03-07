@@ -303,7 +303,7 @@ Game.prototype.placeBet = function(user, betAmount, autoCashOut, callback) {
     assert(typeof user.id === 'number');
     assert(typeof user.username === 'string');
     assert(lib.isInt(betAmount));
-    assert(lib.isInt(autoCashOut) && autoCashOut >= 1);
+    assert(lib.isInt(autoCashOut) && autoCashOut >= 100);
 
     if (self.state !== 'STARTING')
         return callback('GAME_IN_PROGRESS');

@@ -271,6 +271,7 @@ exports.endGame = function(gameId, bonuses, highestMulti, callback) {
 };
 
 function addSatoshis(client, userId, amount, callback) {
+    amount = Math.round(amount/100);
     console.log("Giving ",amount," rais to UserId ",userId);
     client.query('UPDATE users SET balance_rais = balance_rais + $1 WHERE id = $2', [amount, userId], function(err, res) {
         if (err) return callback(err);
