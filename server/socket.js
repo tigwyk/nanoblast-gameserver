@@ -109,8 +109,8 @@ module.exports = function(server,game,chat) {
                 return sendError(socket, '[place_bet] Bet must be a positive amount, got: ' + amount);
             }
 
-            if (amount > 1e24) // 1 NANO limit
-                return sendError(socket, '[place_bet] Max bet size is 1 NANO got: ' + amount);
+            if (amount > 1e8) // 1 NANO limit
+                return sendError(socket, '[place_bet] Max bet size is 1,000,000 rais got: ' + amount);
 
             if (!autoCashOut)
                 return sendError(socket, '[place_bet] Must Send an autocashout with a bet');
